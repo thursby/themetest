@@ -1,10 +1,12 @@
-# themetest
-An open source framework for automated performance testing of WordPress themes
+# ThemeTest
 
-## Quick Start
-Install WordPress, WP CLI, Python, do a bunch of setup.
+An unimaginatively-named open source framework for automated performance testing of WordPress themes.
 
-Import the ACF Custom Fields.
+## Getting Started
+
+Install WordPress, with Advanced Custom Fields (ACF), WP CLI, Python 2.7, pip, virtualenv.
+
+Import the ACF Custom Fields from ```templates/advanced-custom-field-export.xml```
 
 Create a scripts/local_settings.py with your config:
 
@@ -29,3 +31,34 @@ THEMETEST_CONFIG = {
     'wp_cli_path': '/usr/local/bin/wp'
 }
 ```
+
+Set up the ```virtualenv``` and install the requirements with ```pip```:
+```bash
+cd scripts
+virtualenv env
+pip install -r requirements.txt
+```
+
+## Built With
+
+
+* [Python](https://www.python.org/) - Primary scripting and automation
+* [WordPress](https://www.wordpress.org) - Used for testing and deployment
+* [WP CLI](https://wp-cli.org/) - The best way to manage WordPress
+* [Jinja](http://jinja.pocoo.org/docs/2.10/) - Jinja HTML templates
+* [GTmetrix](https://gtmetrix.com/) - Performance Testing
+
+## Contributing
+
+If you're interested in contributing please submit a pull request or open an issue.
+
+## Authors
+
+* **Wayne Thursby** - *Initial work* - [WayneThursby.com](https://www.waynethursby.com)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+
+
