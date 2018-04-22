@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-activate_this = "/home/ubuntu/workspace/env/bin/activate_this.py"
-execfile(activate_this, dict(__file__=activate_this))
 
 import traceback
 import argparse
@@ -16,6 +14,11 @@ import subprocess
 import shutil
 import csv
 from local_settings import THEMETEST_CONFIG
+
+# Load in the virtualenv
+activate_this = os.path.realpath(__file__) + "/env/bin/activate_this.py"
+execfile(activate_this, dict(__file__=activate_this))
+
 
 # coding=utf8
 def force_to_unicode(text):
