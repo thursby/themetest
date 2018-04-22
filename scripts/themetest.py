@@ -367,10 +367,7 @@ def post_rundown(acfdata):
     log = logging.getLogger('post_rundown')
     log.debug(acfdata)
     report_category_id = THEMETEST_CONFIG['report_category_id']
-    #with open('posts.json') as json_file:  
-#        data = json.load(json_file)
-    #http://wpthemetest.waynethursby.com/testwp/wp-json/wp/v2/posts?after=2018-04-18T20:00:00&categories=3
-    timestamp = (datetime.datetime.now() - datetime.timedelta(days=1)).isoformat()
+    timestamp = datetime.datetime.now().isoformat()
     params = dict(
         after=timestamp,
         categories=report_category_id,
