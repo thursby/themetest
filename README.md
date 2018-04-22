@@ -39,6 +39,11 @@ virtualenv env
 pip install -r requirements.txt
 ```
 
+Create a file named ```.gtcredentials``` with your GTmetrix Credentils in the format user:pass
+```
+user.name@domain.com:1343434apikey438484848
+```
+
 ## Built With
 
 

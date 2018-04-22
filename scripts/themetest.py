@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import traceback
+import sys
 import argparse
 import os
 import time
@@ -16,7 +17,7 @@ import csv
 from local_settings import THEMETEST_CONFIG
 
 # Load in the virtualenv
-activate_this = os.path.realpath(__file__) + "/env/bin/activate_this.py"
+activate_this = os.path.abspath(os.path.dirname(sys.argv[0])) + "/env/bin/activate_this.py"
 execfile(activate_this, dict(__file__=activate_this))
 
 
