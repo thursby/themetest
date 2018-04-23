@@ -86,4 +86,11 @@ function themetest_results_full(){
 
 add_shortcode('themetest_results_full', 'themetest_results_full');
 
+/* Change Excerpt length */
+function custom_excerpt_length( $length ) {
+  return 1000;
+}
+
+add_filter('excerpt_length', 'custom_excerpt_length', 1000);
+
 ?>

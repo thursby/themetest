@@ -365,9 +365,11 @@ def post_pages(acfdata):
 def post_rundown(acfdata):
 
     log = logging.getLogger('post_rundown')
-    log.debug(acfdata)
+    #log.debug('ACF Data %s' % acfdata)
+    log.info('Doing a rundown')
+    rundown_category_id = THEMETEST_CONFIG['rundown_category_id']
     report_category_id = THEMETEST_CONFIG['report_category_id']
-    timestamp = datetime.datetime.now().isoformat()
+    timestamp = (datetime.datetime.now() - datetime.timedelta(hours=2)).isoformat()
     params = dict(
         after=timestamp,
         categories=report_category_id,
@@ -393,7 +395,7 @@ def post_rundown(acfdata):
        f.write(r)
     post_id = create_wp_post(
         tmp_filename, 
-        3, 
+        rundown_category_id, 
         "Hey everyone we're back here with another rundown.", 
         "WordPress Theme Performance Rundown - %s" % datetime.datetime.today().strftime("%B %d %Y")
     )
