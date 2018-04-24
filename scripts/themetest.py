@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
-import traceback
-import sys
-import argparse
 import os
+import sys
+# Load in the virtualenv
+activate_this = os.path.abspath(os.path.dirname(sys.argv[0])) + "/env/bin/activate_this.py"
+execfile(activate_this, dict(__file__=activate_this))
+
+import traceback
+import argparse
 import time
 import requests
 import datetime
@@ -13,19 +17,9 @@ import jinja2
 import logging
 import subprocess
 import shutil
-import csv
 from local_settings import THEMETEST_CONFIG
 
-# Load in the virtualenv
-activate_this = os.path.abspath(os.path.dirname(sys.argv[0])) + "/env/bin/activate_this.py"
-execfile(activate_this, dict(__file__=activate_this))
-
-
 # coding=utf8
-def force_to_unicode(text):
-    "If text is unicode, it is returned as is. If it's str, convert it to Unicode using UTF-8 encoding"
-    return text if isinstance(text, unicode) else text.decode('utf8')
-
 
 # Define where the test sites are installed and what URL to use to reach them
 testsite_basedir = THEMETEST_CONFIG['testsite_basedir']
@@ -40,7 +34,7 @@ with open('.gtcredentials') as f:
 
 
 # Change this to logging.INFO to reduce the noise on the screen once everything is running nicely
-screen_logging_level = logging.DEBUG
+screen_logging_level = logging.INFO
 log_filename = __file__ + '.log'
 log_file_format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
 log_screen_format = log_file_format
@@ -76,7 +70,7 @@ parser.add_argument(
 
 parser.add_argument(
     'test_action',
-    choices=['generate_sites', 'test_gt', 'post_pages', 'cleanup', 'rundown', 'auto'],
+    choices=['get_featured', 'generate_sites', 'test_gt', 'post_pages', 'cleanup', 'rundown', 'auto'],
     help='Which part of the process to perform, or auto for fully automated operation.')
 
 args = parser.parse_args()
@@ -104,11 +98,16 @@ def render(tpl_path, context):
 def load_theme_data(filename='../data/featured.json'):
     """This loads the theme data from a JSON formatted list like from 
     api.wordpress.org"""
-
-    with open(filename, "r") as f:
-        data = json.load(f)
+    # if args.dry_run:
+    #     logging.info("Dry run, loading from %s" % filename)
+    #     with open(filename, "r") as f:
+    #         data = json.load(f)['data']
+            
+    # else:
+    #     logging.info("Live Run, loading from WordPress")
+    data = get_featured()
     goodthemes = []
-    for theme in data['data']['themes']:
+    for theme in data['themes']:
         if theme['slug'] != 'twentyseventeen':
             goodthemes.append(theme)
     return goodthemes
@@ -332,8 +331,6 @@ def post_pages(acfdata):
             res = subprocess.check_output(import_command, shell=True)
             post_id = res.splitlines()[len(res.splitlines()) - 1].replace('\n', ' ').replace('\r', '')
 
-        #with open("posts.csv", "a+") as f:
-
         log.info("Slug: %s Post ID: %s" % (theme['theme_slug'], post_id))
         meta_command = wpcli_base + "post meta set %s " % str(post_id)
         for key in theme:
@@ -365,7 +362,6 @@ def post_pages(acfdata):
 def post_rundown(acfdata):
 
     log = logging.getLogger('post_rundown')
-    #log.debug('ACF Data %s' % acfdata)
     log.info('Doing a rundown')
     rundown_category_id = THEMETEST_CONFIG['rundown_category_id']
     report_category_id = THEMETEST_CONFIG['report_category_id']
@@ -399,21 +395,42 @@ def post_rundown(acfdata):
         "Hey everyone we're back here with another rundown.", 
         "WordPress Theme Performance Rundown - %s" % datetime.datetime.today().strftime("%B %d %Y")
     )
-    #api_url = "http://wpthemetest.waynethursby.com/testwp/wp-json/wp/v2/posts?after=%s&categories=3" % timestamp
-    #print(api_url)
-    # matchup = {}
-    # for key in data:
-    #     print(key['slug'])
-    #     matchup[key['slug']] = key['id']
-
-    # r = render('rundown-template.html', context=matchup)
-    # with open('rundown-output.html', "w") as f:
-    #     f.write(r)
 
 
-    #res = render('rundown-template.php', acfdata)
-    #log.info(res)
- 
+def get_featured():
+    log = logging.getLogger('get_featured')
+    log.info('Started get_featured, querying WordPress.org API')
+    r = requests.post('https://api.wordpress.org/themes/info/1.1/',
+        data={
+            'action': 'query_themes', 
+            'request[page]': '1',
+            'request[browse]':'featured',
+            'request[fields][description]': 'true',
+            'request[fields][sections]': 'true',
+            'request[fields][rating]': 'true',
+            'request[fields][ratings]': 'true',
+            'request[fields][downloaded]': 'true',
+            'request[fields][download_link]': 'true',
+            'request[fields][last_updated]': 'true',
+            'request[fields][homepage]': 'true',
+            'request[fields][tags]': 'true',
+            'request[fields][template]': 'true',
+            'request[fields][parent]': 'true',
+            'request[fields][versions]': 'true',
+            'request[fields][screenshot_url]': 'true',
+            'request[fields][active_installs]': 'true'
+        })
+    
+    log.info("HTTP Returned: %s" % r.status_code)
+    log.debug("Body: %s" % r.text)
+    data = r.json()
+    theme_count = 0
+    for theme in data['themes']:
+        log.info("%s: Updated %s" % (theme['name'], theme['last_updated']))
+        theme_count += 1
+    log.info('Converted result to JSON, %s themes total.' % theme_count)
+    return data
+
 
 def main():
     themedata = load_theme_data()
@@ -451,6 +468,9 @@ def main():
         pass
     """ Write a thing to do all necessary log roation """
 
+    if args.test_action == "get_featured":
+        get_featured()    
+        
     if args.test_action == "rundown":
         test_gtmetrix(themedata, readonly=True)
         acfdata = build_acfdata(themedata)
