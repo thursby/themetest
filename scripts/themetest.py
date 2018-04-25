@@ -105,7 +105,7 @@ def load_theme_data(filename='../data/featured.json'):
             
     # else:
     #     logging.info("Live Run, loading from WordPress")
-    data = get_featured()
+    data = get_featured(filename)
     goodthemes = []
     for theme in data['themes']:
         if theme['slug'] != 'twentyseventeen':
@@ -261,23 +261,68 @@ def build_acfdata(themedata):
        
         # build post meta values for custom fields
         acfdata = {}
+        
+        # Data from WordPress.org Themes API
         acfdata['theme_name'] = theme['name']
         acfdata['theme_slug'] = theme['slug']
-        acfdata['theme_version'] = theme['version']
         acfdata['theme_author'] = theme['author']
         acfdata['theme_rating'] = theme['rating']
         acfdata['theme_num_ratings'] = theme['num_ratings']
         acfdata['theme_downloaded'] = theme['downloaded']
         acfdata['theme_last_updated'] = theme['last_updated']
         acfdata['theme_homepage'] = theme['homepage']
-        acfdata['theme_description'] = theme['description']
-        acfdata['pagespeed_score'] = theme['gtmetrix']['results']['pagespeed_score']
-        acfdata['yslow_score'] = theme['gtmetrix']['results']['yslow_score']
-        acfdata['page_elements'] = theme['gtmetrix']['results']['page_elements']
-        acfdata['html_bytes'] = theme['gtmetrix']['results']['html_bytes']
-        acfdata['page_bytes'] = theme['gtmetrix']['results']['page_bytes']
-        acfdata['report_url'] = theme['gtmetrix']['results']['report_url']
-        acfdata['page_load_time'] = theme['gtmetrix']['results']['page_load_time']
+        acfdata['theme_description'] = theme['sections']['description']
+        acfdata['theme_sections'] = theme['sections']
+        acfdata['theme_version'] = theme['version']
+        acfdata['theme_versions'] = theme['versions']
+        # This next thing loads the download link for the above version from a list
+        acfdata['theme_download_link'] = acfdata['theme_versions'][theme['version']]
+        acfdata['theme_homepage'] = theme['homepage']
+        acfdata['theme_tags'] = theme['tags']
+        if 'template' in theme:
+            acfdata['theme_template'] = theme['template']
+        else: 
+            acfdata['theme_template'] = ''
+        if 'parent' in theme:
+            acfdata['theme_parent_slug'] = theme['parent']['slug']
+        else:
+            acfdata['theme_parent_slug'] = ''
+        acfdata['theme_screenshot_url'] = theme['screenshot_url'] 
+        acfdata['theme_active_installs'] = theme['active_installs']
+        
+        # GTMetrix data
+        acfdata['gt_pagespeed_score'] = theme['gtmetrix']['results']['pagespeed_score']
+        acfdata['gt_yslow_score'] = theme['gtmetrix']['results']['yslow_score']
+        acfdata['gt_page_elements'] = theme['gtmetrix']['results']['page_elements']
+        acfdata['gt_html_bytes'] = theme['gtmetrix']['results']['html_bytes']
+        acfdata['gt_page_bytes'] = theme['gtmetrix']['results']['page_bytes']
+        acfdata['gt_report_url'] = theme['gtmetrix']['results']['report_url']
+        acfdata['gt_page_load_time'] = theme['gtmetrix']['results']['page_load_time']
+        acfdata['gt_fully_loaded_time'] = theme['gtmetrix']['results']['fully_loaded_time']
+        acfdata['gt_rum_speed_index'] = theme['gtmetrix']['results']['rum_speed_index']
+        acfdata['gt_html_load_time'] = theme['gtmetrix']['results']['html_load_time']
+        acfdata['gt_first_paint_time'] = theme['gtmetrix']['results']['first_paint_time']
+        acfdata['gt_report_url'] = theme['gtmetrix']['results']['report_url']
+        acfdata['gt_dom_content_loaded_time'] = theme['gtmetrix']['results']['dom_content_loaded_time']
+        acfdata['gt_onload_time'] = theme['gtmetrix']['results']['onload_time']
+        acfdata['gt_backend_duration'] = theme['gtmetrix']['results']['backend_duration']
+        acfdata['gt_onload_duration'] = theme['gtmetrix']['results']['onload_duration']
+        acfdata['gt_connect_duration'] = theme['gtmetrix']['results']['connect_duration']
+        acfdata['gt_first_contentful_paint_time'] = theme['gtmetrix']['results']['first_contentful_paint_time']
+        acfdata['gt_dom_content_loaded_duration'] = theme['gtmetrix']['results']['dom_content_loaded_duration']
+        acfdata['gt_redirect_duration'] = theme['gtmetrix']['results']['redirect_duration']
+        acfdata['gt_dom_interactive_time'] = theme['gtmetrix']['results']['dom_interactive_time']
+        
+        # GTMetrix Resources -- With the exception of the PDF these should actually be processed and saved.
+        acfdata['gt_screenshot_url'] = theme['gtmetrix']['resources']['screenshot']
+        acfdata['gt_report_pdf_url'] = theme['gtmetrix']['resources']['report_pdf']
+        acfdata['gt_pagespeed_url'] = theme['gtmetrix']['resources']['pagespeed']
+        acfdata['gt_report_pdf_full_url'] = theme['gtmetrix']['resources']['report_pdf_full']
+        acfdata['gt_pagespeed_files_url'] = theme['gtmetrix']['resources']['pagespeed_files']
+        acfdata['gt_har_url'] = theme['gtmetrix']['resources']['har']
+        acfdata['gt_yslow_url'] = theme['gtmetrix']['resources']['yslow']
+        
+        # Return the acfdata object as the value of an associated array whose key is the theme_slug
         res[acfdata['theme_slug']] = acfdata
 
     return res
@@ -336,10 +381,13 @@ def post_pages(acfdata):
         for key in theme:
             if isinstance(theme[key], int):
                 value = str(theme[key])
+            elif isinstance(theme[key], dict):
+                value = json.dumps(theme[key])
             else:
                 value = theme[key]
-            value_asc = value.encode('ascii', 'ignore')
-            #value = str(value).replace(u"\u2018", "'").replace(u"\u2019", "'")
+            log.info('%s: %s' % (key, value))
+            if (value is not None):
+                value_asc = value.encode('ascii', 'ignore')
             value_asc = value_asc.replace('\n', ' ').replace('\r', '').replace("'", r"'\''")
             set_meta_command = meta_command + """%s "%s" """ % (key, value_asc)
             log.info("Setting meta: %s - %s" % (key, value_asc))
@@ -397,7 +445,7 @@ def post_rundown(acfdata):
     )
 
 
-def get_featured():
+def get_featured(filename):
     log = logging.getLogger('get_featured')
     log.info('Started get_featured, querying WordPress.org API')
     r = requests.post('https://api.wordpress.org/themes/info/1.1/',
@@ -424,6 +472,9 @@ def get_featured():
     log.info("HTTP Returned: %s" % r.status_code)
     log.debug("Body: %s" % r.text)
     data = r.json()
+    if filename:
+        with open(filename, "w") as f:
+            f.write(json.dumps(data, indent=2))        
     theme_count = 0
     for theme in data['themes']:
         log.info("%s: Updated %s" % (theme['name'], theme['last_updated']))
@@ -466,10 +517,10 @@ def main():
 
     if args.test_action == "archive":
         pass
-    """ Write a thing to do all necessary log roation """
+    """ Write a thing to do all necessary log rotation """
 
     if args.test_action == "get_featured":
-        get_featured()    
+        get_featured('../data/featured.json')    
         
     if args.test_action == "rundown":
         test_gtmetrix(themedata, readonly=True)

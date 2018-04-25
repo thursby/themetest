@@ -60,24 +60,24 @@ function themetest_results_full(){
   <div class="section-div">
     <div class="section-title">PageSpeed</div>
     <div class="second-row">
-      <div class="score"><?php the_field('pagespeed_score'); ?></div>
+      <div class="score"><?php the_field('gt_pagespeed_score'); ?></div>
       <div class="lettergrade">A</div>
     </div>
   </div>
   <div class="section-div">
     <div class="section-title">YSlow</div>
     <div class="second-row">
-      <div class="score"><?php the_field('yslow_score'); ?></div>
+      <div class="score"><?php the_field('gt_yslow_score'); ?></div>
       <div class="lettergrade">B</div>
     </div>
   </div>
   <div class="right-stats">
     <label class="themepage-label">Page Elements</label>
-    <div class="themepage-data"><?php the_field('page_elements'); ?></div>
+    <div class="themepage-data"><?php the_field('gt_page_elements'); ?></div>
     <label class="themepage-label">HTML Bytes</label>
-    <div class="themepage-data"><?php the_field('html_bytes'); ?></div>
+    <div class="themepage-data"><?php the_field('gt_html_bytes'); ?></div>
     <label class="themepage-label">Page Bytes</label>
-    <div class="themepage-data"><?php the_field('page_bytes'); ?></div>
+    <div class="themepage-data"><?php the_field('gt_page_bytes'); ?></div>
   </div>
 </div>
 
