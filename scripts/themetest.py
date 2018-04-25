@@ -6,6 +6,7 @@ import sys
 activate_this = os.path.abspath(os.path.dirname(sys.argv[0])) + "/env/bin/activate_this.py"
 execfile(activate_this, dict(__file__=activate_this))
 
+from pipes import quote
 import traceback
 import argparse
 import time
@@ -389,7 +390,7 @@ def post_pages(acfdata):
             if (value is not None):
                 value_asc = value.encode('ascii', 'ignore')
             value_asc = value_asc.replace('\n', ' ').replace('\r', '').replace("'", r"'\''")
-            set_meta_command = meta_command + """%s "%s" """ % (key, value_asc)
+            set_meta_command = meta_command + """%s '%s' """ % (key, value_asc)
             log.info("Setting meta: %s - %s" % (key, value_asc))
             log.debug("Full Command: %s" % set_meta_command)
             if not args.dry_run:
