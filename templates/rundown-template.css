@@ -1,10 +1,48 @@
-
-
-.themepage-label {
+.entry-excerpt {
+    color: #FFF !important;
+  }
+  
+  .entry-excerpt a {
+    color: #FFFAF0;
+    text-decoration: underline;
+  }
+  .data-row {
+      display: table;
+  }
+  
+  .data-row .col-sm-4 {
+      display: table-cell;
+      vertical-align: middle;
+  }
+  .themepage-label {
     text-align: right;
     font-weight: bold;
   }
-
+  
   .big_number {
-    font-size: 4vw;
+    font-size: 3.5vw;
+    text-align: center;
+    line-height: 0.75em;
   }
+  .big_number_label {
+    font-size: xx-small;
+    font-weight: bold;
+    text-align: center;
+  }
+  /* Small Devices, Tablets */
+  @media only screen and (max-width : 768px) {
+    .big_number {
+      text-align: left;
+      font-size: 100%;
+    }
+    .big_number_label {
+      font-size: 100%;
+      font-weight: bold;
+      text-align: right;
+    }
+  }
+  
+  .no-gutter > [class*='col-'] {
+      padding-right: 2px;
+      padding-left: 2px;
+    }

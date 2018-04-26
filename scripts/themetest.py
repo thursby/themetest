@@ -369,7 +369,7 @@ def post_pages(acfdata):
         value_asc = value_asc.replace('\n', ' ').replace('\r', '').replace("'", r"'\''")
         import_command = wpcli_base + r"""post create --post_content='[themetest_results_full]' --post_category=theme-performance-reports --post_excerpt="%s" --post_title='%s' --porcelain""" % (
             value_asc,
-            "%s - WordPress Theme Performance Test" % theme['theme_name'])
+            "%s - WordPress Theme Performance Report" % theme['theme_name'])
         log.info("Import command: " + import_command)
         if args.dry_run:
             post_id = 4321
