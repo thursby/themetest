@@ -414,7 +414,7 @@ def post_rundown(acfdata):
     log.info('Doing a rundown')
     rundown_category_id = THEMETEST_CONFIG['rundown_category_id']
     report_category_id = THEMETEST_CONFIG['report_category_id']
-    timestamp = (datetime.datetime.now() - datetime.timedelta(hours=2)).isoformat()
+    timestamp = (datetime.datetime.now() - datetime.timedelta(hours=12)).isoformat()
     params = dict(
         after=timestamp,
         categories=report_category_id,
@@ -424,6 +424,7 @@ def post_rundown(acfdata):
     tmp_filename = "../tmp/rundown-output.html"
     template_filename = '../templates/rundown-template.html'
     r = requests.get("%swp-json/wp/v2/posts" % wp_url, params=params)
+    log.info("HTTP Request returned: %s" % r.status_code)
     log.debug(r.text)
     jsonstring = r.text.split('[{"id"', 1)[-1]
     jsonstring = '[{"id"' + jsonstring
@@ -438,12 +439,15 @@ def post_rundown(acfdata):
     r = render(template_filename, context=postdata)
     with open(tmp_filename, "w") as f:
        f.write(r)
-    post_id = create_wp_post(
-        tmp_filename, 
-        rundown_category_id, 
-        "Hey everyone we're back here with another rundown.", 
-        "WordPress Theme Performance Rundown - %s" % datetime.datetime.today().strftime("%B %d %Y")
-    )
+    if not args.dry_run:
+        post_id = create_wp_post(
+            tmp_filename, 
+            rundown_category_id, 
+            "Hey everyone we're back here with another rundown.", 
+            "WordPress Theme Performance Rundown - %s" % datetime.datetime.today().strftime("%B %d %Y")
+        )
+    else:
+        log.info("Dry run, output saved to %s" % tmp_filename)
 
 
 def get_featured(filename):

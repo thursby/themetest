@@ -1,51 +1,10 @@
 
-.screenshots-container{
-    width:180px;
-    display:inline-block
-}
- .themedata-container{
-    display:inline-block;
-    vertical-align:top
-}
- .right-stats{
-    float:right
-}
- .top-stats{
-    width:100%
-}
- .section-div{
-    width:150px;
-    display:inline-block
-}
- .section-title{
-    font-size:1em;
-    text-align:center;
-    width:100px;
-    margin:auto
-}
-.lettergrade{
-    font-size:3em;
-    text-align:center;
-    display:inline-block
-}
-.score{
-    text-align:center;
-    font-size:2.5em;
-    display:inline-block;
-    margin-right:8px
-}
-.second-row{
-    width:100px;
-    margin:auto
-}
-.themepage-label{
-    float:left;
-    text-align:right;
-    margin-bottom:0
-}
-.themepage-data{
-    margin-left:130px
-}
-.themepage-label,.themepage-data{
-    font-size:1.2em
-}
+
+.themepage-label {
+    text-align: right;
+    font-weight: bold;
+  }
+
+  .big_number {
+    font-size: 4vw;
+  }
