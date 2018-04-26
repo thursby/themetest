@@ -1,28 +1,62 @@
 <p>This is a rundown.</p>
 
-<table>
-    <thead>
-      <tr>
-        <th>Screenshot</th>
-        <th>Theme Name</th>
-        <th>PageSpeed</th>
-        <th>YSlow</th>
-        <th>HTML Bytes</th>
-        <th>Page Bytes</th>
-        <th>Load Time</th>
-      </tr>
-    </thead>
-    <tbody>
-        {% for slug, id in context.iteritems() %}
-        <tr>
-            <td><img src="/theme-images/{{ slug }}.png" width="180px"></td>
-            <td>[acf field='theme_name' post_id='{{ id }}']</td>
-            <td>[acf field='pagespeed_score' post_id='{{ id }}']</td>
-            <td>[acf field='yslow_score' post_id='{{ id }}']</td>
-            <td>[acf field='html_bytes' post_id='{{ id }}']</td>
-            <td>[acf field='page_bytes' post_id='{{ id }}']</td>
-            <td>[acf field='page_load_time' post_id='{{ id }}']</td>
-        </tr>
-        {% endfor %}
-  </tbody>
-</table>
+
+<div class="container-fluid">
+  <div class="row hidden-xs">
+    <div class="col-sm-3 col-xs-12 rundown_header">Screenshot</div>
+    <div class="col-sm-3 col-xs-12 rundown_header">Theme Info</div>
+    <div class="col-sm-1 col-xs-6 rundown_header">PS</div>
+    <div class="col-sm-1 col-xs-6 rundown_header">YS</div>
+    <div class="col-sm-4 col-xs-12 rundown_header">Theme Data</div>
+  </div>
+{% for slug, id in context.iteritems() %}
+  <div class="row">
+    <div class="col-sm-3 col-xs-12">
+      <img src="/theme-images/{{ slug }}.png" width="180px">
+    </div>
+
+    <div class="col-sm-1 col-xs-3">
+        <div class="themepage-label">Name:</div>
+        <div class="themepage-label">Author:</div>
+        <div class="themepage-label">Version:</div>
+        <div class="themepage-label">Rating:</div>
+        <div class="themepage-label">Downloads:</div>
+        <div class="themepage-label">Updated:</div>
+    </div>
+    <div class="col-sm-2 col-xs-9">
+        <div class="themepage-data">[acf field='theme_name' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='theme_author' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='theme_version' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='theme_rating' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='theme_downloaded' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='theme_last_updated' post_id='{{ id }}']</div>
+    </div>
+
+    <div class="col-xs-3 visible-xs">
+        <div class="themepage-label">PageSpeed:</div>
+        <div class="themepage-label">YSlow:</div>
+    </div>
+    <div class="col-sm-2 col-xs-9">
+        <div class="col-sm-6 big_number">[acf field='gt_pagespeed_score' post_id='{{ id }}']</div>
+        <div class="col-sm-6 big_number">[acf field='gt_yslow_score' post_id='{{ id }}']</div>
+    </div>
+    
+    <div class="col-sm-1 col-xs-3">
+      <div class="themepage-label">Elements:</div>
+      <div class="themepage-label">Page Bytes:</div>
+      <div class="themepage-label">HTML Bytes:</div>
+      <div class="themepage-label">Load Time:</div>
+      <div class="themepage-label">FCP Time:</div>
+      <div class="themepage-label">DOM Int.:</div>
+    </div>
+    <div class="col-sm-3 col-xs-9">
+        <div class="themepage-data">[acf field='gt_page_elements' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='gt_page_bytes' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='gt_html_bytes' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='gt_page_load_time' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='gt_first_contentful_paint_time' post_id='{{ id }}']</div>
+        <div class="themepage-data">[acf field='gt_dom_interactive_time' post_id='{{ id }}']</div>
+    </div>
+  </div> <!-- row -->
+{% endfor %}
+</div> <!-- container -->

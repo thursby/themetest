@@ -32,7 +32,7 @@ THEMETEST_CONFIG = {
 }
 ```
 
-Set up the ```virtualenv``` and install the requirements with ```pip```:
+Set up the ```env``` and install the requirements with ```pip```:
 ```bash
 cd scripts
 virtualenv env
@@ -44,8 +44,22 @@ Create a file named ```.gtcredentials``` with your GTmetrix Credentils in the fo
 user.name@domain.com:1343434apikey438484848
 ```
 
-## Built With
+## Current Roadmap
+* v0.1.0 - Stable tool performing daily GT Metrix tests and saving all data to WordPress
+* v0.2.0 - Separate all components into logical units, produce a framework
+* v0.3.0 - Expand testing to include additional tests
+* v0.4.0 - Integrate control and reporting into WordPress UI
+* v0.5.0 - Create the ability to run tests remotely (AWS or similar)
 
+## Release targets for v1.0.0
+* Detect new themes from a variety of configurable sources
+* Automatically install themes with a range of configurable generated content
+* Test the installations with a variety of configurable tests
+* Save all data into WordPress custom fields
+* Ensure saved data is accessible via WP API
+* Remove dependency on external Advanced Custom Fields
+
+## Built With
 
 * [Python](https://www.python.org/) - Primary scripting and automation
 * [WordPress](https://www.wordpress.org) - Used for testing and deployment
