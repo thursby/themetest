@@ -439,6 +439,7 @@ def post_rundown():
         log.info("Proccesing %s:%s" % (theme_name, post_id))
         post_ids += post_id + " "
         theme_count += 1
+    post_ids = post_ids.strip()
     if not args.dry_run:
         post_id = create_wp_post(
             """<p>Hey back with another rundown</p> <!--more--> [themetest_results_rundown post_ids="%s"]""" % post_ids, 
