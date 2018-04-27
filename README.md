@@ -36,6 +36,7 @@ Set up the ```env``` and install the requirements with ```pip```:
 ```bash
 cd scripts
 virtualenv env
+source env/bin/activate
 pip install -r requirements.txt
 ```
 

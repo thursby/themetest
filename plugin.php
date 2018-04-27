@@ -2,7 +2,7 @@
 /*
 * Plugin Name: ThemeTest plugin
 * Description: Do stuff for themetests
-* Version: 0.1
+* Version: 0.0.1 beta
 * Author: Wayne Thursby
 * Author URI: https://www.waynethursby.com
 */

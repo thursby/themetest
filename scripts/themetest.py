@@ -96,16 +96,9 @@ def render(tpl_path, context):
     ).get_template(filename).render(context=context)
 
 
-def load_theme_data(filename='../data/featured.json'):
+def load_theme_data(filename='../tmp/featured.json'):
     """This loads the theme data from a JSON formatted list like from 
     api.wordpress.org"""
-    # if args.dry_run:
-    #     logging.info("Dry run, loading from %s" % filename)
-    #     with open(filename, "r") as f:
-    #         data = json.load(f)['data']
-            
-    # else:
-    #     logging.info("Live Run, loading from WordPress")
     data = get_featured(filename)
     goodthemes = []
     for theme in data['themes']:
@@ -329,7 +322,7 @@ def build_acfdata(themedata):
     return res
 
 
-def create_wp_post(post_content, post_category, post_excerpt, post_title):
+def create_wp_post(post_content, post_category, post_excerpt, post_title, post_status="draft"):
     log = logging.getLogger('create_wp_post')
     if not post_content.endswith('.html'):
         post_content = "--post-content='%s'" % post_content      
@@ -339,7 +332,12 @@ def create_wp_post(post_content, post_category, post_excerpt, post_title):
     if args.dry_run: wpcli_base = "echo " + wpcli_base
     post_excerpt = post_excerpt.encode('ascii', 'ignore')
     post_excerpt = post_excerpt.replace('\n', ' ').replace('\r', '')
-    import_command = wpcli_base + r"""post create %s --post_category=%s --post_excerpt="%s" --porcelain --post_title="%s" """ % (post_content, post_category, post_excerpt, post_title)
+    import_command = wpcli_base + r"""post create %s --post_status='%s' --post_category=%s --post_excerpt="%s" --porcelain --post_title="%s" """ % (
+            post_content, 
+            post_status,
+            post_category, 
+            post_excerpt,
+            post_title)
     log.info("Executing: " + import_command)
     if args.dry_run:
         post_id = 4321
@@ -367,7 +365,7 @@ def post_pages(acfdata):
         value = theme['theme_description']
         value_asc = value.encode('ascii', 'ignore')
         value_asc = value_asc.replace('\n', ' ').replace('\r', '').replace("'", r"'\''")
-        import_command = wpcli_base + r"""post create --post_content='[themetest_results_full]' --post_category=theme-performance-reports --post_excerpt="%s" --post_title='%s' --porcelain""" % (
+        import_command = wpcli_base + r"""post create --post_status=publish --post_content='[themetest_results_full]' --post_category=theme-performance-reports --post_excerpt="%s" --post_title='%s' --porcelain""" % (
             value_asc,
             "%s - WordPress Theme Performance Report" % theme['theme_name'])
         log.info("Import command: " + import_command)
@@ -408,7 +406,7 @@ def post_pages(acfdata):
         log.info(image_feat_id)
 
 
-def post_rundown(acfdata):
+def post_rundown():
 
     log = logging.getLogger('post_rundown')
     log.info('Doing a rundown')
@@ -430,24 +428,48 @@ def post_rundown(acfdata):
     jsonstring = '[{"id"' + jsonstring
     data = json.loads(jsonstring)
     postdata = {}
+    theme_images = ""
+    post_ids = ""
     for key in data:
         post_id = str(key['id'])
         theme_name = key['slug']
         theme_name = theme_name.split('-wordpress-theme-performance')[0]
+        theme_images += "%s/%s.png " % (images_path, theme_name)
         log.info("Proccesing %s:%s" % (theme_name, post_id))
-        postdata[theme_name] = post_id
-    r = render(template_filename, context=postdata)
-    with open(tmp_filename, "w") as f:
-       f.write(r)
+        post_ids += post_id + " "
     if not args.dry_run:
         post_id = create_wp_post(
-            tmp_filename, 
+            "<p>Hey back with another rundown</p> <!--more--> [themetest_results_rundown post_ids='%s']" % post_ids, 
             rundown_category_id, 
-            "Hey everyone we're back here with another rundown.", 
+            "", 
             "WordPress Theme Performance Rundown - %s" % datetime.datetime.today().strftime("%B %d %Y")
         )
     else:
         log.info("Dry run, output saved to %s" % tmp_filename)
+
+    image_filename = "../tmp/rundown_featured-%s.jpg" % datetime.datetime.today().strftime("%y%m%d")
+    montage_command = "montage %s -thumbnail 240x240 -sharpen 10  -background grey20 -geometry '240x240-50-30' +polaroid -resize 100%% -tile 5x3 %s" % (
+        theme_images,
+        image_filename)
+
+    if args.dry_run: montage_command = "echo " + montage_command
+    log.info("Creating montage: %s" % montage_command)
+    subprocess.check_output(montage_command, shell=True)
+
+    wpcli_base = "%s --path=%s " % (THEMETEST_CONFIG['wp_cli_path'], wp_path)
+    if args.dry_run: wpcli_base = "echo " + wpcli_base
+    import_command = wpcli_base + r"""media import "%s" --post_id=%s --featured_image --porcelain""" % (
+        image_filename,
+        str(post_id).strip())
+    log.info("Import: " + import_command)
+    if args.dry_run:
+        log.info("Dry run, faking id")
+        image_feat_id = 5432
+    else:
+        image_feat_id = subprocess.check_output(import_command, shell=True)
+
+    log.info(image_feat_id)
+
 
 
 def get_featured(filename):
@@ -528,9 +550,9 @@ def main():
         get_featured('../data/featured.json')    
         
     if args.test_action == "rundown":
-        test_gtmetrix(themedata, readonly=True)
-        acfdata = build_acfdata(themedata)
-        post_rundown(acfdata)
+        #test_gtmetrix(themedata, readonly=True)
+        #acfdata = build_acfdata(themedata)
+        post_rundown()
         #post_content = render('rundown-template.html', acfdata)
         #print(post_content)
     
