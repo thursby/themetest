@@ -430,6 +430,7 @@ def post_rundown():
     postdata = {}
     theme_images = ""
     post_ids = ""
+    theme_count = 0
     for key in data:
         post_id = str(key['id'])
         theme_name = key['slug']
@@ -437,9 +438,10 @@ def post_rundown():
         theme_images += "%s/%s.png " % (images_path, theme_name)
         log.info("Proccesing %s:%s" % (theme_name, post_id))
         post_ids += post_id + " "
+        theme_count += 1
     if not args.dry_run:
         post_id = create_wp_post(
-            "<p>Hey back with another rundown</p> <!--more--> [themetest_results_rundown post_ids='%s']" % post_ids, 
+            """<p>Hey back with another rundown</p> <!--more--> [themetest_results_rundown post_ids="%s"]""" % post_ids, 
             rundown_category_id, 
             "", 
             "WordPress Theme Performance Rundown - %s" % datetime.datetime.today().strftime("%B %d %Y")
@@ -447,9 +449,20 @@ def post_rundown():
     else:
         log.info("Dry run, output saved to %s" % tmp_filename)
 
+    # Set a reasonable looking tile scheme based on the number of themes in this batch
+    if 16 <= theme_count <= 18: tile_string = '4x4'
+    elif 14 <= theme_count <= 15: tile_string = '5x3'
+    elif 10 <= theme_count <= 13: tile_string = '4x3'
+    elif 8 <= theme_count <= 9: tile_string = '3x3'
+    elif 8 <= theme_count <= 7: tile_string = '3x2'
+    
+    # Insert a blank as the first item for alignment if the count is certain numbers, adding "null:" does that
+    if theme_count == 10: theme_images = "null: " + theme_images
+
     image_filename = "../tmp/rundown_featured-%s.jpg" % datetime.datetime.today().strftime("%y%m%d")
-    montage_command = "montage %s -thumbnail 240x240 -sharpen 10  -background grey20 -geometry '240x240-50-30' +polaroid -resize 100%% -tile 5x3 %s" % (
+    montage_command = "montage %s -thumbnail 240x240 -sharpen 10  -background grey20 -geometry '240x240-50-30' +polaroid -resize 100%% -tile %s %s" % (
         theme_images,
+        tile_string,
         image_filename)
 
     if args.dry_run: montage_command = "echo " + montage_command
@@ -518,7 +531,7 @@ def main():
         test_gtmetrix(themedata)
         acfdata = build_acfdata(themedata)
         post_pages(acfdata)
-        post_rundown(acfdata)
+        post_rundown()
 
     if args.test_action == "generate_sites":
         generate_sites(themedata)
