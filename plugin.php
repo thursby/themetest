@@ -11,7 +11,7 @@
 function themetest_user_scripts() {
     $plugin_url = plugin_dir_url( __FILE__ );
 
-    wp_enqueue_style( 'style',  $plugin_url . "/templates/rundown-template.css");
+    wp_enqueue_style( 'style',  $plugin_url . "/style.css");
 }
 
 add_action( 'wp_enqueue_scripts', 'themetest_user_scripts' );
@@ -19,6 +19,7 @@ add_action( 'wp_enqueue_scripts', 'themetest_user_scripts' );
 function themetest_results_full(){
   $theme_name = get_field('theme_name', $post_id);
   $theme_version = get_field('theme_version', $post_id);
+  $theme_featured_image = get_the_post_thumbnail_url($post_id);
   $theme_description = get_field('theme_description', $post_id);
   $theme_preview_url = get_field('theme_preview_url', $post_id);
   $theme_slug = get_field('theme_slug', $post_id);
@@ -53,7 +54,7 @@ function themetest_results_full(){
     <div class="col-sm-6">
       <figure>
         <a href="$theme_preview_url" target="_blank">
-        <img src="/theme-images/$theme_slug.png" width="320" scale="0"> 
+        <img src="$theme_featured_image" width="320" scale="0"> 
         </a>
         <figcaption>Official Screenshot</figcaption>
       </figure>
@@ -145,6 +146,8 @@ EODA;
   }
   foreach ($post_ids as $post_id) {
     $theme_name = get_field('theme_name', $post_id);
+    $theme_featured_image = get_the_post_thumbnail_url($post_id);
+    $theme_permalink = get_permalink($post_id);
     $theme_slug = get_field('theme_slug', $post_id);
     $theme_author = get_field('theme_author', $post_id);
     $theme_version = get_field('theme_version', $post_id);
@@ -163,7 +166,9 @@ EODA;
     $newrow = <<<EODB
       <div class="row no-gutter">
         <div class="col-sm-3 col-xs-12">
-          <img src="/theme-images/$theme_slug.png" class="img-responsive img-rounded">
+        <a href="$theme_permalink" rel="noopener" target="_blank">
+        <img src="$theme_featured_image" class="img-responsive img-rounded">
+        </a>
         </div>
         <div class="col-sm-4 no-gutter">
           <div class="col-xs-4">

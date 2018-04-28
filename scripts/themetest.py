@@ -234,7 +234,7 @@ def build_acfdata(themedata):
     for theme in themedata:
         wp_theme = theme['name']
         log.info("Name %s, Slug: %s, Version %s" % (theme['name'], theme['slug'], theme['version']))
-        screenshot_filename = "%s/%s.png" % (images_path, theme['slug'])
+        screenshot_filename = "%s/%s.jpg" % (images_path, theme['slug'])
         screenshot_url = 'http:' + theme['screenshot_url']
         log.info("Screenshot URL: %s" % screenshot_url)
         if args.dry_run:
@@ -250,6 +250,9 @@ def build_acfdata(themedata):
                 with open(screenshot_filename, 'wb') as handle:
                     for block in response.iter_content(1024):
                         handle.write(block)
+                
+                os.system('convert %s -quality 75 %s' % (screenshot_filename, os.path.splitext(screenshot_filename)[0]+'.jpg' ))
+
             else:
                 log.info("File exists, skipping %s" % screenshot_filename)      
        
@@ -353,7 +356,7 @@ def post_pages(acfdata):
         log.debug(theme)
         wp_theme = theme['theme_slug']
         wp_instance_name = wp_theme + "01"
-        image_filename = "%s/%s.png" % (images_path, wp_theme)
+        image_filename = "%s/%s.jpg" % (images_path, wp_theme)
         ss_filename = "%s/%s-ss.png" % (images_path, wp_theme)
         gtmetrix_data_filename = "gtmetrix/" + wp_instance_name + "-test.log"
         gtmetrix_screenshot_filename = "%s/%s-ss.png" % (images_path, wp_theme)
@@ -435,7 +438,7 @@ def post_rundown():
         post_id = str(key['id'])
         theme_name = key['slug']
         theme_name = theme_name.split('-wordpress-theme-performance')[0]
-        theme_images += "%s/%s.png " % (images_path, theme_name)
+        theme_images += "%s/%s.jpg " % (images_path, theme_name)
         log.info("Proccesing %s:%s" % (theme_name, post_id))
         post_ids += post_id + " "
         theme_count += 1
