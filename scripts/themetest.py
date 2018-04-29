@@ -130,6 +130,7 @@ def generate_sites(themedata):
         dbname = THEMETEST_CONFIG['dbname']
         dbuser = THEMETEST_CONFIG['dbuser']
         dbpass = THEMETEST_CONFIG['dbpass']
+        wp_admin_password = THEMETEST_CONFIG['wp_admin_password']
         site_url = testsite_baseurl + wp_instance_name
         site_path = testsite_basedir + wp_instance_name
         wp_cli_base = "wp --path=%s " % site_path
@@ -139,7 +140,7 @@ def generate_sites(themedata):
         os.system(wp_cli_base + "core download")
         #os.system(wp_cli_base + "core config --dbhost=localhost --dbname=wp03_themetest --dbprefix=%s --dbuser=wp03_themetest --dbpass=MYSwaterloo1815" % (dbname, prefix_db, dbuser, dbpass))
         os.system(wp_cli_base + "core config --dbhost=%s --dbname=%s --dbprefix=%s --dbuser=%s --dbpass=%s" % (dbhost, dbname, prefix_db, dbuser, dbpass))
-        os.system(wp_cli_base + "core install --url=%s --title='Your Blog Title' --admin_name=wpadmin --admin_password=nDNNjOI12840DKndf38 --admin_email=you@example.com" % site_url)
+        os.system(wp_cli_base + "core install --url=%s --title='Your Blog Title' --admin_name=wpadmin --admin_password=%s --admin_email=you@example.com" % (site_url, wp_admin_password))
         os.system(wp_cli_base + "theme install %s" % wp_theme)
         os.system(wp_cli_base + "theme activate %s" % wp_theme)
 
@@ -328,7 +329,7 @@ def build_acfdata(themedata):
 def create_wp_post(post_content, post_category, post_excerpt, post_title, post_status="draft"):
     log = logging.getLogger('create_wp_post')
     if not post_content.endswith('.html'):
-        post_content = "--post-content='%s'" % post_content      
+        post_content = "--post_content='%s'" % post_content      
 
     log.debug("Params: %s, %s, %s, %s" % (post_content, post_category, post_excerpt, post_title))
     wpcli_base = "%s --path=%s " % (THEMETEST_CONFIG['wp_cli_path'], wp_path)
@@ -368,7 +369,7 @@ def post_pages(acfdata):
         value = theme['theme_description']
         value_asc = value.encode('ascii', 'ignore')
         value_asc = value_asc.replace('\n', ' ').replace('\r', '').replace("'", r"'\''")
-        import_command = wpcli_base + r"""post create --post_status=publish --post_content='[themetest_results_full]' --post_category=theme-performance-reports --post_excerpt="%s" --post_title='%s' --porcelain""" % (
+        import_command = wpcli_base + r"""post create --post_status=publish --post_content='[themetest_results_full]' --post_category=theme-performance-reports --post_excerpt='%s' --post_title='%s' --porcelain""" % (
             value_asc,
             "%s - WordPress Theme Performance Report" % theme['theme_name'])
         log.info("Import command: " + import_command)
@@ -419,7 +420,8 @@ def post_rundown():
     params = dict(
         after=timestamp,
         categories=report_category_id,
-        post_status="publish"
+        per_page=20,
+        post_status="publish",
     )
     wp_url = THEMETEST_CONFIG['wp_url']
     tmp_filename = "../tmp/rundown-output.html"
