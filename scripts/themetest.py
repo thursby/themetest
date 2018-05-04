@@ -141,8 +141,9 @@ def generate_sites(themedata):
         #os.system(wp_cli_base + "core config --dbhost=localhost --dbname=wp03_themetest --dbprefix=%s --dbuser=wp03_themetest --dbpass=MYSwaterloo1815" % (dbname, prefix_db, dbuser, dbpass))
         os.system(wp_cli_base + "core config --dbhost=%s --dbname=%s --dbprefix=%s --dbuser=%s --dbpass=%s" % (dbhost, dbname, prefix_db, dbuser, dbpass))
         os.system(wp_cli_base + "core install --url=%s --title='Your Blog Title' --admin_name=wpadmin --admin_password=%s --admin_email=you@example.com" % (site_url, wp_admin_password))
-        os.system(wp_cli_base + "theme install %s" % wp_theme)
-        os.system(wp_cli_base + "theme activate %s" % wp_theme)
+        os.system(wp_cli_base + "theme install %s --activate" % wp_theme)
+        os.system(wp_cli_base + "plugin install wordpress-importer --activate")
+        os.system(wp_cli_base + "import %swp-content/plugins/themetest/data/testdata.xml --authors=skip" % (wp_path))
 
 
 def test_gtmetrix(themedata, readonly=False):
@@ -466,7 +467,7 @@ def post_rundown():
     if theme_count == 10: theme_images = "null: " + theme_images
 
     image_filename = "../tmp/rundown_featured-%s.jpg" % datetime.datetime.today().strftime("%y%m%d")
-    montage_command = "montage %s -thumbnail 240x240 -sharpen 10  -background grey20 -geometry '240x240-50-30' +polaroid -resize 100%% -tile %s %s" % (
+    montage_command = "montage %s -thumbnail 240x240 -sharpen 10  -background snow -geometry '240x240-50-30' +polaroid -resize 100%% -tile %s %s" % (
         theme_images,
         tile_string,
         image_filename)
