@@ -71,7 +71,7 @@ parser.add_argument(
 
 parser.add_argument(
     'test_action',
-    choices=['get_featured', 'generate_sites', 'test_gt', 'post_pages', 'cleanup', 'rundown', 'auto'],
+    choices=['get_featured', 'generate_sites', 'test_gt', 'post_pages', 'cleanup', 'rundown', 'auto', 'detect_new'],
     help='Which part of the process to perform, or auto for fully automated operation.')
 
 args = parser.parse_args()
@@ -490,6 +490,22 @@ def post_rundown():
 
     log.info(image_feat_id)
 
+def load_featured(filename):
+    """Load featured themes from a previously saved featured.json"""
+
+    log = logging.getLogger('load_featured')
+    log.info('Started load_featured, opening %s' % filename)
+    data = {}
+    if os.path.isfile(filename):
+        with open(filename, "r") as f:
+            data = json.load(f)
+     
+        theme_count = 0
+        for theme in data['themes']:
+            log.info("%s: Updated %s" % (theme['name'], theme['last_updated']))
+            theme_count += 1
+        log.info('Loaded from %s, %s themes total.' % (filename, theme_count))
+    return data
 
 
 def get_featured(filename):
@@ -526,7 +542,7 @@ def get_featured(filename):
     for theme in data['themes']:
         log.info("%s: Updated %s" % (theme['name'], theme['last_updated']))
         theme_count += 1
-    log.info('Converted result to JSON, %s themes total.' % theme_count)
+    log.info('Decoded JSON, %s themes total.' % theme_count)
     return data
 
 
@@ -567,7 +583,38 @@ def main():
     """ Write a thing to do all necessary log rotation """
 
     if args.test_action == "get_featured":
-        get_featured('../data/featured.json')    
+        get_featured('../data/featured.json')  
+
+    if args.test_action == "detect_new":
+        last_run = ''
+        if os.path.isfile('.lastrun'):
+            with open('.lastrun') as f:
+                last_run = f.readline()
+        todays_date = datetime.datetime.now().strftime('%Y%m%d')
+        if not last_run == todays_date:          
+            old_themes = load_featured('../data/lastfeatured.json')
+            old_theme_list = []
+            for theme in old_themes['themes']:
+                old_theme_list.append(theme['slug'])
+            new_themes = get_featured('../data/thisfeatured.json')
+            new_theme_list = []
+            for theme in new_themes['themes']:
+                new_theme_list.append(theme['slug'])
+            old_theme_list.sort()
+            new_theme_list.sort()
+            any_new_themes = []
+            any_new_themes = [c for c in old_theme_list if c not in new_theme_list] # Comprehension? Not for me.
+            if any_new_themes:
+                print("There are new themes!")
+                with open('../data/lastfeatured.json', 'w') as f:
+                    f.write(json.dumps(new_themes))
+                with open('.lastrun', 'w') as f:
+                    last_run = f.write(todays_date)
+            else:
+                print("No themes!")
+        else:
+            print("Hasn't been long enough")
+
         
     if args.test_action == "rundown":
         #test_gtmetrix(themedata, readonly=True)
