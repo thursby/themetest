@@ -547,9 +547,9 @@ def get_featured(filename):
 
 
 def main():
-    themedata = load_theme_data()
     logging.info("Action: " + args.test_action)
     if args.test_action == "auto":
+        themedata = load_theme_data()
         generate_sites(themedata)
         test_gtmetrix(themedata)
         acfdata = build_acfdata(themedata)
@@ -557,12 +557,15 @@ def main():
         post_rundown()
 
     if args.test_action == "generate_sites":
+        themedata = load_theme_data()
         generate_sites(themedata)
 
     if args.test_action == "test_gt":
+        themedata = load_theme_data()
         test_gtmetrix(themedata)
 
     if args.test_action == "post_pages":
+        themedata = load_theme_data()
         test_gtmetrix(themedata, readonly=True)
         acfdata = build_acfdata(themedata)
         post_pages(acfdata)
@@ -586,6 +589,8 @@ def main():
         get_featured('../data/featured.json')  
 
     if args.test_action == "detect_new":
+        log = logging.getLogger('detect_new')
+        log.info('Started detect_new, checking for new themes on WordPress.org')
         last_run = ''
         if os.path.isfile('.lastrun'):
             with open('.lastrun') as f:
@@ -605,15 +610,23 @@ def main():
             any_new_themes = []
             any_new_themes = [c for c in old_theme_list if c not in new_theme_list] # Comprehension? Not for me.
             if any_new_themes:
-                print("There are new themes!")
+                log.info("New themes detected! Beginning test")
                 with open('../data/lastfeatured.json', 'w') as f:
                     f.write(json.dumps(new_themes))
                 with open('.lastrun', 'w') as f:
                     last_run = f.write(todays_date)
+                if not args.dry_run:
+                    generate_sites(new_themes)
+                    test_gtmetrix(new_themes)
+                    acfdata = build_acfdata(new_themes)
+                    post_pages(acfdata)
+                    post_rundown()
+                else:
+                    log.info("Dry run, otherwise we would totally be doing some theme testing.")
             else:
-                print("No themes!")
+                log.info("No new themes detected, going back to sleep.")
         else:
-            print("Hasn't been long enough")
+            log.info("Not running, hasn't been long enough since last run: %s" % last_run)
 
         
     if args.test_action == "rundown":
