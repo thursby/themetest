@@ -96,10 +96,16 @@ def render(tpl_path, context):
     ).get_template(filename).render(context=context)
 
 
-def load_theme_data(filename='../tmp/featured.json'):
+def load_theme_data(filename=''):
     """This loads the theme data from a JSON formatted list like from 
     api.wordpress.org"""
-    data = get_featured(filename)
+
+    if filename == '':
+        filename = '../tmp/featured.json'
+	data = get_featured(filename)
+    else:
+        with open(filename, "r") as f:
+	    data = json.load(f)       
     goodthemes = []
     for theme in data['themes']:
         if theme['slug'] != 'twentyseventeen':
@@ -561,7 +567,7 @@ def main():
         generate_sites(themedata)
 
     if args.test_action == "test_gt":
-        themedata = load_theme_data()
+        themedata = load_theme_data('../data/featured.json')
         test_gtmetrix(themedata)
 
     if args.test_action == "post_pages":
@@ -616,9 +622,13 @@ def main():
                 with open('.lastrun', 'w') as f:
                     last_run = f.write(todays_date)
                 if not args.dry_run:
-                    generate_sites(new_themes)
-                    test_gtmetrix(new_themes)
-                    acfdata = build_acfdata(new_themes)
+                    goodthemes = []
+                    for theme in new_themes['themes']:
+                        if theme['slug'] != 'twentyseventeen':
+                            goodthemes.append(theme)                 
+                    generate_sites(goodthemes)
+                    test_gtmetrix(goodthemes)
+                    acfdata = build_acfdata(goodthemes)
                     post_pages(acfdata)
                     post_rundown()
                 else:

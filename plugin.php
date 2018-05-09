@@ -7,6 +7,13 @@
 * Author URI: https://www.waynethursby.com
 */
 
+function my_home_category( $query ) {
+  if ( $query->is_home() && $query->is_main_query() ) {
+  $query->set( 'cat', '3');
+  }
+}
+add_action( 'pre_get_posts', 'my_home_category' );
+
 
 function themetest_user_scripts() {
     $plugin_url = plugin_dir_url( __FILE__ );
