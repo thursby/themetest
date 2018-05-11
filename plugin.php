@@ -139,12 +139,7 @@ EOD;
 
 function themetest_results_rundown($atts = [], $content = null, $tag = '') {
   $res = <<<EODA
-<div class="container-fluid">
-<div class="row">
-  <div class="col-xs-12">
-    <?php the_excerpt(); ?>
-  </div>
-</div>
+<div id="themetest-rundown" class="container-fluid">
 
 EODA;
 
@@ -171,10 +166,10 @@ EODA;
     $gt_yslow_score = get_field('gt_yslow_score', $post_id);
 
     $newrow = <<<EODB
-      <div class="row no-gutter">
+      <div class="row no-gutter theme-panel">
         <div class="col-sm-3 col-xs-12">
         <a href="$theme_permalink" rel="noopener" target="_blank">
-        <img src="$theme_featured_image" class="img-responsive img-rounded">
+        <img src="$theme_featured_image" class="img-responsive">
         </a>
         </div>
         <div class="col-sm-4 no-gutter">
@@ -226,6 +221,7 @@ EODA;
         </div>
     
       </div> <!-- row -->
+
 EODB;
 
     $res .= $newrow;
