@@ -45,3 +45,17 @@
     padding-right: 2px;
     padding-left: 2px;
   }
+
+#themetest-rundown {
+    background-color: #eeeeee;
+    margin-top: 15px;
+  }
+
+#themetest-rundown .panel {
+  background-color: #fff;
+  }
+
+.theme-panel {
+    margin-bottom: 20px;
+    background-color: #fff;
+  }
