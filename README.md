@@ -2,6 +2,8 @@
 
 An unimaginatively-named open source framework for automated performance testing of WordPress themes.
 
+This is currently powering the [WordPress Theme Performance Reports](https://www.themereports.com) over at https://www.themereports.com
+
 ## Getting Started
 
 Install WordPress, with Advanced Custom Fields (ACF), WP CLI, Python 2.7, pip, virtualenv.
@@ -21,7 +23,9 @@ THEMETEST_CONFIG = {
     'wp_path': "/var/www/themes-site.test",
     'wp_url': 'https://themes-site.test/', # include /
     'report_category_id': '2', # The ID of the target category for theme report posts
+    'report_user_id': '3', # The ID of the author for reports
     'rundown_category_id': '3', # The ID of the rundown category
+    'rundown_user_id': '2', # The ID of the author for rundown
     'dbhost': 'db_hostname',
     'dbname': 'db_name',
     'dbuser': 'db_username',

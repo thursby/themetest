@@ -162,7 +162,7 @@ def test_gtmetrix(themedata, readonly=False):
         wp_theme = theme['slug']
         wp_instance_name = wp_theme + "01"
         prefix_db = wp_instance_name + "_"
-        site_url = testsite_baseurl + wp_instance_name
+        site_url = "%s%s/" % (testsite_baseurl, wp_instance_name)
         site_path = testsite_basedir + wp_instance_name
         gtmetrix_data_filename = "../data/" + wp_instance_name + "-test.log"
         gtmetrix_screenshot_filename = "%s/%s-ss.png" % (images_path, wp_theme)
@@ -333,7 +333,7 @@ def build_acfdata(themedata):
     return res
 
 
-def create_wp_post(post_content, post_category, post_excerpt, post_title, post_status="draft"):
+def create_wp_post(post_content, post_author, post_category, post_excerpt, post_title, post_status="draft"):
     log = logging.getLogger('create_wp_post')
     if not post_content.endswith('.html'):
         post_content = "--post_content='%s'" % post_content      
@@ -343,8 +343,9 @@ def create_wp_post(post_content, post_category, post_excerpt, post_title, post_s
     if args.dry_run: wpcli_base = "echo " + wpcli_base
     post_excerpt = post_excerpt.encode('ascii', 'ignore')
     post_excerpt = post_excerpt.replace('\n', ' ').replace('\r', '')
-    import_command = wpcli_base + r"""post create %s --post_status='%s' --post_category=%s --post_excerpt="%s" --porcelain --post_title="%s" """ % (
-            post_content, 
+    import_command = wpcli_base + r"""post create %s --post_author=%s --post_status='%s' --post_category=%s --post_excerpt="%s" --porcelain --post_title="%s" """ % (
+            post_content,
+            post_author, 
             post_status,
             post_category, 
             post_excerpt,
@@ -368,6 +369,7 @@ def post_pages(acfdata):
         ss_filename = "%s/%s-ss.png" % (images_path, wp_theme)
         gtmetrix_data_filename = "gtmetrix/" + wp_instance_name + "-test.log"
         gtmetrix_screenshot_filename = "%s/%s-ss.png" % (images_path, wp_theme)
+        report_category_id =  THEMETEST_CONFIG['report_category_id']
 
         # TODO: set all of the metadata at post create, for now just do it afterwards
         # porcelain makes it just output the ID
@@ -376,7 +378,8 @@ def post_pages(acfdata):
         value = theme['theme_description']
         value_asc = value.encode('ascii', 'ignore')
         value_asc = value_asc.replace('\n', ' ').replace('\r', '').replace("'", r"'\''")
-        import_command = wpcli_base + r"""post create --post_status=publish --post_content='[themetest_results_full]' --post_category=theme-performance-reports --post_excerpt='%s' --post_title='%s' --porcelain""" % (
+        import_command = wpcli_base + r"""post create --post_status=publish --post_content='[themetest_results_full]' --post_category=%s --post_excerpt='%s' --post_title='%s' --porcelain""" % (
+            report_category_id,
             value_asc,
             "%s - WordPress Theme Performance Report" % theme['theme_name'])
         log.info("Import command: " + import_command)
@@ -423,6 +426,7 @@ def post_rundown():
     log.info('Doing a rundown')
     rundown_category_id = THEMETEST_CONFIG['rundown_category_id']
     report_category_id = THEMETEST_CONFIG['report_category_id']
+    rundown_user_id = THEMETEST_CONFIG['rundown_user_id']
     timestamp = (datetime.datetime.now() - datetime.timedelta(hours=12)).isoformat()
     params = dict(
         after=timestamp,
@@ -454,7 +458,8 @@ def post_rundown():
     post_ids = post_ids.strip()
     if not args.dry_run:
         post_id = create_wp_post(
-            """<p>Hey back with another rundown</p> <!--more--> [themetest_results_rundown post_ids="%s"]""" % post_ids, 
+            """<p>Hey back with another rundown</p> <!--more--> [themetest_results_rundown post_ids="%s"]""" % post_ids,
+            rundown_user_id,
             rundown_category_id, 
             "", 
             "WordPress Theme Performance Rundown - %s" % datetime.datetime.today().strftime("%B %d %Y")
