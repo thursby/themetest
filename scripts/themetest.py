@@ -370,6 +370,7 @@ def post_pages(acfdata):
         gtmetrix_data_filename = "gtmetrix/" + wp_instance_name + "-test.log"
         gtmetrix_screenshot_filename = "%s/%s-ss.png" % (images_path, wp_theme)
         report_category_id =  THEMETEST_CONFIG['report_category_id']
+        report_user_id = THEMETEST_CONFIG['report_user_id']
 
         # TODO: set all of the metadata at post create, for now just do it afterwards
         # porcelain makes it just output the ID
@@ -378,7 +379,8 @@ def post_pages(acfdata):
         value = theme['theme_description']
         value_asc = value.encode('ascii', 'ignore')
         value_asc = value_asc.replace('\n', ' ').replace('\r', '').replace("'", r"'\''")
-        import_command = wpcli_base + r"""post create --post_status=publish --post_content='[themetest_results_full]' --post_category=%s --post_excerpt='%s' --post_title='%s' --porcelain""" % (
+        import_command = wpcli_base + r"""post create --post_author=%s --post_status=publish --post_content='[themetest_results_full]' --post_category=%s --post_excerpt='%s' --post_title='%s' --porcelain""" % (
+            report_user_id,
             report_category_id,
             value_asc,
             "%s - WordPress Theme Performance Report" % theme['theme_name'])
